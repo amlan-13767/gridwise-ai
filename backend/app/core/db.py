@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from .config import settings
 
 _is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+if settings.ENVIRONMENT == "production" and _is_sqlite:
+    raise RuntimeError("ENVIRONMENT=production requires a PostgreSQL DATABASE_URL; refusing to fall back to SQLite.")
 _url = settings.DATABASE_URL.replace("postgres://", "postgresql://", 1)
 if _url.startswith("postgresql://"):
     _url = _url.replace("postgresql://", "postgresql+psycopg://", 1)

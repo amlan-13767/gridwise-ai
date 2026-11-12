@@ -1,5 +1,6 @@
 // GRIDWISE AI - silent demonstration recorder (Playwright video, no audio).
-// Usage: BASE_URL=http://localhost:3000 node e2e/record-demo.mjs   (API must be reachable by the frontend)
+// Local:      BASE_URL=http://localhost:3000 node e2e/record-demo.mjs
+// Production: BASE_URL=https://gridwise-ai-xi.vercel.app E2E_EMAIL=... E2E_PASSWORD=... node e2e/record-demo.mjs
 // Drives the REAL running application with real mouse movement and clicks. Data shown is SIMULATED.
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
@@ -48,8 +49,15 @@ await page.goto(BASE); await wait(3200);
 await scroll(500); await wait(1500); await top();
 await click(page.getByTestId("cta-login"), 1500);
 // 3 Login as administrator (password field is masked; demo account, simulated environment)
-await click(page.getByTestId("demo-administrator"), 1200);
-await click(page.getByRole("button", { name: "Sign in" }), 3500);
+if (process.env.E2E_EMAIL && process.env.E2E_PASSWORD) {
+  // production run: credentials come from the environment, typed into the (masked) password field; never written anywhere
+  await click(page.locator("#email"), 300); await page.keyboard.type(process.env.E2E_EMAIL, { delay: 70 });
+  await click(page.locator("#password"), 300); await page.keyboard.type(process.env.E2E_PASSWORD, { delay: 70 }); await wait(600);
+} else {
+  await click(page.getByTestId("demo-administrator"), 1200); // local demo accounts only
+}
+await click(page.getByRole("button", { name: "Sign in" }), process.env.E2E_EMAIL ? 25000 : 3500); // production free tier may need to wake up
+await page.getByTestId("kpi").first().waitFor({ timeout: 90000 });
 // 4-5 Dashboard KPIs
 await hover(page.getByTestId("kpi").first()); await wait(1800);
 await hover(page.getByTestId("kpi").nth(3)); await wait(1500);

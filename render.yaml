@@ -1,4 +1,5 @@
-# Render Blueprint for the API (Docker). Create a Render Postgres and set DATABASE_URL, SECRET_KEY, FRONTEND_URL.
+# Render Blueprint for the API (Docker, FREE plan). The Postgres database `gridwise-db` already exists and is NOT managed here.
+# Set these in the Render dashboard (Environment). Values marked sync:false are never stored in Git.
 services:
   - type: web
     name: gridwise-api
@@ -8,7 +9,11 @@ services:
     dockerContext: .
     healthCheckPath: /api/health
     envVars:
-      - { key: DATABASE_URL, sync: false }
-      - { key: SECRET_KEY, generateValue: true }
-      - { key: FRONTEND_URL, sync: false }
+      - { key: DATABASE_URL, sync: false }          # Internal Database URL of gridwise-db
+      - { key: SECRET_KEY, generateValue: true }    # JWT signing + device keys
+      - { key: FRONTEND_URL, sync: false }          # https://gridwise-ai-xi.vercel.app
+      - { key: ENVIRONMENT, value: production }     # forbids SQLite fallback, schema managed by Alembic
       - { key: DEMO_MODE, value: "true" }
+      - { key: SEED_DEMO_DATA, value: "true" }      # loads SIMULATED campus data once, only into an empty database
+      - { key: GRIDWISE_ADMIN_EMAIL, sync: false }  # first Super Administrator (owner chooses)
+      - { key: GRIDWISE_ADMIN_PASSWORD, sync: false } # >= 12 chars; owner chooses; never committed

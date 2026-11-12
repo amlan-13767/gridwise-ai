@@ -9,7 +9,8 @@ from .api import auth, campus, energy, intel, ops
 
 @asynccontextmanager
 async def lifespan(app):
-    Base.metadata.create_all(engine)
+    if settings.ENVIRONMENT != "production":  # production schema is managed by Alembic (see bootstrap)
+        Base.metadata.create_all(engine)
     yield
 
 

@@ -1,4 +1,5 @@
-export const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Production builds must set NEXT_PUBLIC_API_URL; the localhost fallback exists for local development only.
+export const API = (process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000")).replace(/\/+$/, "");
 const KEY = "gridwise_token";
 const USER = "gridwise_user";
 
@@ -17,6 +18,7 @@ export class ApiError extends Error { status: number; constructor(m: string, s: 
 
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
   const t = getToken();
+  if (!API) throw new ApiError("The API address is not configured (NEXT_PUBLIC_API_URL is missing in this deployment).", 0);
   let res: Response;
   try {
     res = await fetch(API + path, {

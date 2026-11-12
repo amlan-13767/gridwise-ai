@@ -24,8 +24,9 @@ export default function Login() {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) });
   const submit = async (v: F) => {
     setBusy(true);
-    try { const r = await api("/api/auth/login", { method: "POST", body: v }); setSession(r.access_token, r.user); toast.success(`Welcome, ${r.user.name}`); router.push("/dashboard"); }
-    catch (e: any) { toast.error(e.message || "Login failed"); } finally { setBusy(false); }
+    const wake = setTimeout(() => toast.info("Waking the demo server… the free hosting tier can take up to a minute after inactivity.", { id: "wake", duration: 60000 }), 4000);
+    try { const r = await api("/api/auth/login", { method: "POST", body: v }); setSession(r.access_token, r.user); toast.dismiss("wake"); toast.success(`Welcome, ${r.user.name}`); router.push("/dashboard"); }
+    catch (e: any) { toast.dismiss("wake"); toast.error(e.message || "Login failed"); } finally { clearTimeout(wake); setBusy(false); }
   };
   return (
     <div className="grid min-h-screen lg:grid-cols-2">

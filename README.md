@@ -4,7 +4,8 @@
 > **Everything in the demo is SIMULATED.** Buildings, meters, solar assets, occupancy, weather and map positions are generated sample data, not the real NIT Rourkela inventory or measurements. Model accuracy is measured on that simulated data only. The platform **monitors and recommends; it never controls equipment.** Savings are *estimates* unless a recommendation is explicitly recorded as MEASURED.
 
 * Repository: https://github.com/amlan-13767/gridwise-ai (public)
-* Live frontend: https://gridwise-ai-xi.vercel.app (Vercel team `amlan-prateek-pandas-projects`, project `gridwise-ai`). **The API is not deployed yet**, so login on the hosted site shows "Cannot reach the GRIDWISE API" until a backend host is configured (see `docs/deployment.md`).
+* Live frontend: https://gridwise-ai-xi.vercel.app (Vercel) · API: https://gridwise-api-9ypw.onrender.com (Render free tier, PostgreSQL). The free API sleeps when idle: the first request after inactivity can take ~1 minute.
+* **First login**: there are no built-in production accounts. The owner creates the first Super Administrator by setting `GRIDWISE_ADMIN_EMAIL` and `GRIDWISE_ADMIN_PASSWORD` in the Render environment (see `docs/deployment.md`).
 * Silent demo video: [`demo/gridwise-ai-demo.mp4`](demo/gridwise-ai-demo.mp4) (local app, simulated data, no audio)
 
 ## Problem and solution
@@ -34,7 +35,7 @@ uvicorn backend.app.main:app --port 8000
 cd frontend && cp ../.env.example .env.local   # then keep NEXT_PUBLIC_* lines; quote values containing '#'
 npm install && npm run dev                      # http://localhost:3000
 ```
-Production DB: set `DATABASE_URL=postgresql://…`, run `alembic upgrade head`, then seed. Real deployments should **not** seed demo users: create the first admin with `GRIDWISE_ADMIN_PASSWORD=… python -m backend.app.cli create-admin --email you@org`. `docker compose up --build` starts API + Postgres + Redis + authenticated Mosquitto + workers.
+Production start-up (`python -m backend.app.bootstrap`) runs migrations, creates the first admin from env vars and optionally loads the simulated dataset; see `docs/deployment.md`. Production never creates demo accounts. `docker compose up --build` starts API + Postgres + Redis + authenticated Mosquitto + workers.
 
 ## Tests
 ```bash
