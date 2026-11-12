@@ -66,7 +66,7 @@ def _payload(meter, ts, kw=25.0, **k):
 
 
 def test_ingestion_pipeline(client):
-    ts = dt.datetime.now(dt.timezone.utc).replace(second=0, microsecond=0)
+    ts = dt.datetime.now(dt.timezone.utc).replace(second=37, microsecond=0)  # off the 15-min seed grid
     key = {"X-Device-Key": device_key("test-secret-key", "MTR-ACD-01")}
     p = _payload("MTR-ACD-01", ts)
     r = client.post("/api/iot/ingest", json=p, headers=key); assert r.status_code == 201 and r.json()["status"] == "stored"
