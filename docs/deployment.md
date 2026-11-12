@@ -2,7 +2,7 @@
 
 | piece | where | notes |
 |---|---|---|
-| Frontend | Vercel team `amlan-prateek-pandas-projects`, project `gridwise-ai` → https://gridwise-ai-xi.vercel.app | needs `NEXT_PUBLIC_API_URL` (public Config variable) at **build** time: redeploy after changing it |
+| Frontend | Vercel (Git-connected; **Root Directory must be `frontend`**: with the repo root a build fails with `ENOENT package.json`) team `amlan-prateek-pandas-projects`, project `gridwise-ai` → https://gridwise-ai-xi.vercel.app | needs `NEXT_PUBLIC_API_URL` (public Config variable) at **build** time: redeploy after changing it |
 | API | Render Web Service `gridwise-api` (Docker, **Free** plan) → https://gridwise-api-9ypw.onrender.com (`/docs`, `/api/health`) | free instances spin down after ~15 min idle; the first request can take up to a minute |
 | Database | Render PostgreSQL `gridwise-db` (free) | free Render Postgres databases expire after a limited period; back up or upgrade before relying on it |
 | MQTT broker / workers | not deployed (needs a persistent host); `docker compose` locally | never run these in Vercel serverless functions |
@@ -12,7 +12,7 @@
 1. Waits for PostgreSQL (10 retries) and fails fast with a clear message if `DATABASE_URL` is wrong (password masked).
 2. Runs Alembic migrations. If the tables were created earlier by `create_all` (the first Render deploy did this), the schema is **adopted with `alembic stamp head`**, never recreated; no data is touched.
 3. Creates the first Super Administrator from environment variables (idempotent, see below).
-4. If `SEED_DEMO_DATA=true` **and** the database has no completed seed, loads the SIMULATED campus dataset (35 buildings, 302k readings), trains-free inference (forecasts, anomalies, optimisation run, recommendations) and writes a `seed_complete` marker. A half-finished seed (e.g. an out-of-memory kill) is detected by the missing marker and redone; seeding refuses if any non-simulated data exists. Seeding is skipped on every later start.
+4. If `SEED_DEMO_DATA=true` **and** the database has no completed seed, loads the SIMULATED campus dataset (35 buildings, 302k readings), model inference (forecasts, anomalies, optimisation run, recommendations) and writes a `seed_complete` marker. A half-finished seed (e.g. an out-of-memory kill) is detected by the missing marker and redone; seeding refuses if any non-simulated data exists. Seeding is skipped on every later start.
 `ENVIRONMENT=production` forbids a SQLite fallback and disables `create_all`.
 
 ## Creating the first Super Administrator (owner action, no code changes)
