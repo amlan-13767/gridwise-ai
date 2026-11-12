@@ -25,4 +25,16 @@ for r in (auth.router, campus.router, energy.router, intel.router, ops.router):
 
 @app.get("/api/health")
 def health():
-    return dict(status="ok", mode="monitoring_and_recommendation_only", data="SIMULATED DEMONSTRATION DATA" if settings.DEMO_MODE else "see source labels")
+    """Liveness plus non-sensitive deployment state (booleans only) to diagnose first-run setup."""
+    from sqlalchemy import select, func
+    from .core.db import SessionLocal
+    from .models.tables import User, Zone
+    out = dict(status="ok", mode="monitoring_and_recommendation_only", data="SIMULATED DEMONSTRATION DATA" if settings.DEMO_MODE else "see source labels",
+               version="1.1.0", environment=settings.ENVIRONMENT)
+    try:
+        with SessionLocal() as db:
+            out.update(database="ok", simulated_data_loaded=bool(db.scalar(select(func.count()).select_from(Zone))),
+                       first_admin_configured=bool(db.scalar(select(func.count()).select_from(User).where(User.role == "super_admin"))))
+    except Exception:  # noqa: BLE001
+        out.update(status="degraded", database="unreachable")
+    return out

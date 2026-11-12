@@ -234,7 +234,10 @@ def test_audit_log(client, admin):
 
 
 def test_health_and_cors(client):
-    assert client.get("/api/health").json()["mode"] == "monitoring_and_recommendation_only"
+    h = client.get("/api/health").json()
+    assert h["mode"] == "monitoring_and_recommendation_only" and h["database"] == "ok"
+    assert h["simulated_data_loaded"] is True and h["first_admin_configured"] is True
+    assert not any(k in h for k in ("database_url", "secret", "email"))
     r = client.options("/api/health", headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"})
     assert "access-control-allow-origin" not in r.headers
 
