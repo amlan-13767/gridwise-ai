@@ -5,8 +5,7 @@ from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from ml.common import load_readings, metrics, MODELS, REPORTS
 
-FEATURES = ["irradiance", "cloud_cover", "temperature", "hour", "doy", "capacity_kw"]
-CAPACITY_KW = 400.0  # simulated installed capacity
+from ml.renewable.constants import FEATURES, CAPACITY_KW  # noqa: E402  (simulated installed capacity)
 
 
 def solar_hourly(df):

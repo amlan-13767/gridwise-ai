@@ -196,10 +196,8 @@ def _solar_actual_vs_fc(db, hours=48):
     w = common.weather_frame(db, (now - pd.Timedelta(hours=hours + 2)).to_pydatetime())
     w["ts"] = pd.to_datetime(w.timestamp).dt.floor("h")
     wh = w.groupby("ts").agg(irradiance=("irradiance", "mean"), cloud_cover=("cloud_cover", "mean"), temperature=("temperature", "mean")).reset_index()
-    import joblib
-    from ml.common import MODELS
-    from ml.renewable.solar import FEATURES
-    bundle = joblib.load(MODELS / "solar.joblib")
+    from ml.renewable.constants import FEATURES
+    bundle = forecast_service.load_model("solar")
     loc = wh.ts + IST; wh["hour"] = loc.dt.hour; wh["doy"] = loc.dt.dayofyear; wh["capacity_kw"] = 400.0
     wh["pred"] = np.clip(bundle["model"].predict(wh[FEATURES]), 0, None)
     q = select(func.sum(RenewableReading.generation_kw).label("kw"), RenewableReading.timestamp).group_by(RenewableReading.timestamp).where(RenewableReading.timestamp >= (now - pd.Timedelta(hours=hours)).to_pydatetime())

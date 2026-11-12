@@ -8,11 +8,7 @@ from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from ml.common import load_readings, load_buildings, metrics, MODELS, REPORTS
 
-HORIZONS = {"1_hour": 1, "24_hours": 24, "7_days": 168}
-SEED = 42
-FEATURES = ["lag_a", "lag_b", "lag_c", "hour", "dow", "month", "is_weekend", "is_holiday",
-            "temperature", "humidity", "occupancy", "zone_code", "bld_mean"]
-ZONES = {"Academic": 0, "Hostel": 1, "Residential": 2}
+from ml.forecasting.constants import HORIZONS, SEED, FEATURES, ZONES  # noqa: E402
 
 
 def hourly(df):

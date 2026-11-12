@@ -1,5 +1,5 @@
 """Pandas analytics on a cached hourly frame (stored in UTC; presented in IST)."""
-import time, datetime as dt
+import threading, time, datetime as dt
 import numpy as np, pandas as pd
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
@@ -10,6 +10,7 @@ from .optimization_service import tariff_by_hour
 
 IST = pd.Timedelta(hours=5, minutes=30)
 _cache = {"key": None, "t": 0, "df": None}
+_lock = threading.Lock()  # one rebuild at a time: concurrent requests must not each build a copy (memory)
 SQLITE = engine.dialect.name == "sqlite"
 
 
@@ -19,8 +20,15 @@ def utc_hour(col):
 
 def frame(db: Session) -> pd.DataFrame:
     key = db.scalar(select(func.max(EnergyReading.id)))
-    if _cache["key"] == key and time.time() - _cache["t"] < 120 and _cache["df"] is not None:
+    if _cache["key"] == key and time.time() - _cache["t"] < 600 and _cache["df"] is not None:
         return _cache["df"]
+    with _lock:
+        if _cache["key"] == key and time.time() - _cache["t"] < 600 and _cache["df"] is not None:
+            return _cache["df"]  # another request finished the rebuild while we waited
+        return _build_frame(db, key)
+
+
+def _build_frame(db: Session, key) -> pd.DataFrame:
     hb = utc_hour(EnergyReading.timestamp).label("hb")
     q = (select(hb, Meter.building_id, Meter.id.label("meter_id"), EnergyReading.data_source,
                 func.sum(EnergyReading.energy_consumption_kwh).label("kwh"), func.max(EnergyReading.power_demand_kw).label("kw_max"),

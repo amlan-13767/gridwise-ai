@@ -1,7 +1,6 @@
 import datetime as dt
 import numpy as np, pandas as pd
 from sqlalchemy.orm import Session
-from optimization.cooling_optimizer import optimize_cooling
 from ..models.tables import Building, Zone
 from . import common
 from .optimization_service import tariff_by_hour
@@ -52,6 +51,7 @@ def analysis(db: Session, days=14, zone_ids=None, building_id=None):
 
 
 def optimize(db: Session, building_id: int, days=7):
+    from optimization.cooling_optimizer import optimize_cooling  # scipy imported lazily
     bmap = common.building_map(db); b, zt = bmap[building_id]
     f = _frame(db, days); g = f[f.building_id == building_id]
     cap = b.capacity or 1

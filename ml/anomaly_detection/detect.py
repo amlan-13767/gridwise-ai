@@ -2,7 +2,6 @@
 and Isolation Forest. Anomalies are investigation leads, NOT confirmed wastage."""
 import json
 import numpy as np, pandas as pd
-from sklearn.ensemble import IsolationForest
 from ml.common import load_readings, REPORTS
 
 
@@ -12,6 +11,7 @@ def severity(dev_pct):
 
 
 def detect(df: pd.DataFrame, z_thr=4.0, contamination=0.004):
+    from sklearn.ensemble import IsolationForest  # imported lazily: keeps the API process small
     d = df.copy(); d["ts"] = d.timestamp.dt.floor("h")
     h = d.groupby(["building_id", "zone_type", "ts"]).agg(
         y=("power_demand_kw", "mean"), label=("injected_anomaly", "max") if "injected_anomaly" in d else ("power_demand_kw", "size")).reset_index()

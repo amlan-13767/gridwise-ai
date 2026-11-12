@@ -5,13 +5,21 @@ import joblib, numpy as np, pandas as pd
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 from ml.common import MODELS
-from ml.forecasting.train import FEATURES, ZONES, HORIZONS
+from ml.forecasting.constants import FEATURES, ZONES, HORIZONS
 from ml.data_generation.generate import HOLIDAYS
-from ml.renewable.solar import FEATURES as SFEAT
+from ml.renewable.constants import FEATURES as SFEAT
 from ..models.tables import Forecast, Building, Zone
 from . import common, model_service
 
 IST = pd.Timedelta(hours=5, minutes=30)
+_models: dict = {}
+
+
+def load_model(name: str):
+    """joblib bundles are loaded once per process (sklearn/xgboost are imported only when first needed)."""
+    if name not in _models:
+        _models[name] = joblib.load(MODELS / f"{name}.joblib")
+    return _models[name]
 
 
 def _climatology(db, origin, bmap):
@@ -61,7 +69,7 @@ def run_forecast(db: Session, horizons=("1_hour", "24_hours", "7_days")):
     gen = dt.datetime.utcnow()
     for hname in horizons:
         hz = HORIZONS[hname]
-        bundle = joblib.load(MODELS / f"demand_{hname}.joblib")
+        bundle = load_model(f"demand_{hname}")
         steps = [1] if hz == 1 else list(range(1, 25)) if hz == 24 else list(range(1, 169))
         db.execute(delete(Forecast).where(Forecast.horizon == hname, Forecast.scope.in_(["building", "zone", "campus"])))
         agg = {}
@@ -93,7 +101,7 @@ def run_forecast(db: Session, horizons=("1_hour", "24_hours", "7_days")):
 
 
 def solar_predict(db, origin, steps=range(1, 25)):
-    bundle = joblib.load(MODELS / "solar.joblib")
+    bundle = load_model("solar")
     w = common.weather_frame(db, (origin - pd.Timedelta(days=7)).to_pydatetime())
     w["h"] = (pd.to_datetime(w.timestamp) + IST).dt.hour
     wc = w.groupby("h")[["temperature", "cloud_cover", "irradiance"]].mean()

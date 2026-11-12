@@ -1,5 +1,5 @@
 FROM python:3.13-slim
-ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 MALLOC_ARENA_MAX=2
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY backend/requirements.txt backend/requirements.txt

@@ -2,7 +2,6 @@ import datetime as dt
 import numpy as np, pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from optimization.load_scheduling import optimize_load_shifting
 from ..models.tables import Forecast, EnergyTariff, OptimizationRun, Building, Zone
 from . import common
 
@@ -50,6 +49,7 @@ def build_inputs(db):
 
 
 def run_load_shifting(db: Session, user_id, peak_penalty=2.0, waste_lambda=0.5, peak_cap_kw=None):
+    from optimization.load_scheduling import optimize_load_shifting  # ortools imported lazily
     demand, solar, base, flex = build_inputs(db)
     tar = tariff_by_hour(db)
     res = optimize_load_shifting(base, solar, tar, flex, waste_lambda=waste_lambda, peak_penalty=peak_penalty, peak_cap_kw=peak_cap_kw)
