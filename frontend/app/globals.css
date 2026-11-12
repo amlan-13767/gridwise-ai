@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f6fa; --surface: #ffffff; --ink: #0f172a; --ink2: #475569; --muted: #94a3b8; --line: #e2e8f0;
+  --navy: #0b1730; --navy2: #14254a; --primary: #2563eb; --good: #059669; --warn: #d97706; --bad: #dc2626;
+  --academic: #2a78d6; --hostel: #eb6834; --residential: #1baf7a; --solar: #eda100;
+}
+@theme inline {
+  --color-bg: var(--bg); --color-surface: var(--surface); --color-ink: var(--ink); --color-ink2: var(--ink2);
+  --color-muted: var(--muted); --color-line: var(--line); --color-navy: var(--navy); --color-navy2: var(--navy2);
+  --color-primary: var(--primary); --color-good: var(--good); --color-warn: var(--warn); --color-bad: var(--bad);
+  --font-sans: var(--font-geist-sans);
+}
+html { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-geist-sans), system-ui, sans-serif; }
+.leaflet-container { font-family: inherit; }
+.fade-in { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.skeleton { background: linear-gradient(90deg,#eef2f7,#f8fafc,#eef2f7); background-size: 200% 100%; animation: sh 1.2s infinite; border-radius: 8px; }
+@keyframes sh { to { background-position: -200% 0; } }
