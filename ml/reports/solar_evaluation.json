@@ -1,0 +1,41 @@
+{
+  "version": "v1",
+  "trained_at": "2026-11-12T20:51:31.946953+00:00",
+  "dataset": "SIMULATED solar generation",
+  "metrics": {
+    "baseline_hourly_average": {
+      "mae": 6.000363266369753,
+      "rmse": 11.982259320063815,
+      "mape": 7.403190172412274,
+      "smape": 3.955786811084509
+    },
+    "random_forest": {
+      "mae": 0.85990610642898,
+      "rmse": 1.6045586946529715,
+      "mape": 1.3146630091661173,
+      "smape": 0.6893958581681788,
+      "val": {
+        "mae": 0.7627669336939048,
+        "rmse": 1.5462856842019352,
+        "mape": 1.1245255163022807,
+        "smape": 0.6149317046438554
+      },
+      "resid_std": 1.5217814837379153
+    },
+    "xgboost": {
+      "mae": 0.859287284035941,
+      "rmse": 1.565246415369389,
+      "mape": 1.406352852507675,
+      "smape": 95.53162786996424,
+      "val": {
+        "mae": 0.8208787118851433,
+        "rmse": 1.5691424542220571,
+        "mape": 1.2664391987182118,
+        "smape": 91.15792706548613
+      },
+      "resid_std": 1.5674471868313664
+    },
+    "selected_by_validation_rmse": "random_forest"
+  },
+  "note": "Forecast inputs (irradiance/cloud) are assumed to come from a weather forecast service."
+}

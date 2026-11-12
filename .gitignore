@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+.next/
+*.db
+*.db-*
+.env
+.env.local
+data/synthetic/
+data/processed/
+demo/raw/
+frontend/test-results/
+playwright-report/
+.vercel/
