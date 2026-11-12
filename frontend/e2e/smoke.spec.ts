@@ -69,3 +69,20 @@ test("anomaly review, optimisation run and CSV export", async ({ page }) => {
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByTestId("export-csv").click()]);
   expect(dl.suggestedFilename()).toMatch(/\.csv$/);
 });
+
+test("administrator can add a building and change the emissions factor", async ({ page }) => {
+  await login(page);
+  await page.goto("/settings");
+  await page.locator("select").first().selectOption({ index: 1 });
+  await page.getByPlaceholder("ACD-11").fill("E2E-01");
+  await page.locator('input[name="building_name"]').fill("E2E Test Block");
+  await page.locator('input[name="building_type"]').fill("lecture");
+  await page.locator('input[name="floor_area"]').fill("1200");
+  await page.getByRole("button", { name: "Add building" }).click();
+  await expect(page.getByText(/Building added/)).toBeVisible();
+  await expect(page.getByRole("cell", { name: "E2E Test Block" })).toBeVisible();
+  const ef = page.getByTestId("set-grid_emissions_factor");
+  await ef.fill("0.8"); await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Settings saved")).toBeVisible();
+  await ef.fill("0.82"); await page.getByRole("button", { name: "Save changes" }).click();
+});

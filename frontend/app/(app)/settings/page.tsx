@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { api, isAdmin, getUser } from "@/lib/api";
 import { Btn, Card, Note, PageHeader, Q, Table, Td } from "@/components/ui";
 import { ist } from "@/lib/format";
+import CampusConfig from "@/components/dashboard/CampusConfig";
 
 const FIELDS: [string, string, string][] = [
   ["grid_emissions_factor", "Grid emissions factor (kg CO₂e / kWh)", "Assumption: replace with an official value"],
@@ -31,6 +32,7 @@ export default function Settings() {
         <Card className="mt-6" title="Electricity tariff slabs (assumptions)"><Table head={["Name", "From", "To", "₹ / kWh", "Basis"]}>{d.tariffs.map((t: any) => <tr key={t.id}><Td>{t.name}</Td><Td>{t.start_hour}:00</Td><Td>{t.end_hour}:00</Td><Td>{t.rate}</Td><Td>{t.assumption ? "assumption" : "official"}</Td></tr>)}</Table></Card>
         <Card className="mt-6" title="Data mode"><p className="text-sm">{d.settings.data_mode}</p><div className="mt-2"><Note>Control capability is disabled by design: the platform monitors and recommends only.</Note></div></Card>
       </>)}</Q>
+      {admin && <CampusConfig />}
       {admin && <Card className="mt-6" title="Recent audit log"><Q q={logs}>{(d: any) => <Table head={["When (IST)", "User", "Action", "Entity"]}>{d.items.map((a: any) => <tr key={a.id}><Td>{ist(a.at)}</Td><Td>{a.user || "system"}</Td><Td>{a.action}</Td><Td>{a.entity} {a.entity_id}</Td></tr>)}</Table>}</Q></Card>}
     </>
   );

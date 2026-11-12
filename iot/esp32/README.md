@@ -1,0 +1,2 @@
+# ESP32 prototype (not built, no hardware used)
+Intended design: ESP32 reads a **certified** energy meter (Modbus RTU/TCP or pulse/serial) and a DHT/SHT temperature-humidity sensor, then publishes the JSON payload documented in `docs/iot_integration.md` over MQTT/TLS with its device key every 15 minutes (NTP-synchronised UTC timestamps; buffer locally on outages). Do not wire boards directly to mains. This repository ships only the simulator.

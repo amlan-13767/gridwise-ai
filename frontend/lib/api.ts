@@ -17,11 +17,16 @@ export class ApiError extends Error { status: number; constructor(m: string, s: 
 
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
   const t = getToken();
-  const res = await fetch(API + path, {
-    method: opts.method || "GET",
-    headers: { "Content-Type": "application/json", ...(t ? { Authorization: `Bearer ${t}` } : {}) },
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(API + path, {
+      method: opts.method || "GET",
+      headers: { "Content-Type": "application/json", ...(t ? { Authorization: `Bearer ${t}` } : {}) },
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+  } catch {
+    throw new ApiError(`Cannot reach the GRIDWISE API (${API}). Check that the backend is running and NEXT_PUBLIC_API_URL is set.`, 0);
+  }
   if (res.status === 401 && t && !path.includes("/auth/login")) {
     clearSession(); if (typeof window !== "undefined") window.location.href = "/login";
   }

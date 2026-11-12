@@ -237,3 +237,11 @@ def test_health_and_cors(client):
     assert client.get("/api/health").json()["mode"] == "monitoring_and_recommendation_only"
     r = client.options("/api/health", headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"})
     assert "access-control-allow-origin" not in r.headers
+
+
+def test_renewable_attributed_to_filtered_scope(client, admin):
+    camp = client.get("/api/energy/overview?days=30", headers=admin).json()
+    res = client.get("/api/energy/overview?days=30&zone=Residential", headers=admin).json()
+    acad = client.get("/api/energy/overview?days=30&zone=Academic", headers=admin).json()
+    assert res["renewable_kwh"] == 0 and res["renewable_pct"] == 0          # solar assets are academic only
+    assert abs(acad["renewable_kwh"] - camp["renewable_kwh"]) < 1e-6

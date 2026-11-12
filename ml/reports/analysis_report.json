@@ -1,0 +1,35 @@
+{
+ "data_source": "SIMULATED",
+ "days": 90,
+ "total_kwh": 1579809.7754000002,
+ "avg_daily_kwh": 17553.44194888889,
+ "peak_kw": 1319.6552,
+ "estimated_cost_inr": 10216005.05565,
+ "zone": {
+  "Academic": {
+   "kwh": 495056.0,
+   "cost": 3104684.0
+  },
+  "Hostel": {
+   "kwh": 744210.0,
+   "cost": 4876801.0
+  },
+  "Residential": {
+   "kwh": 340544.0,
+   "cost": 2234519.0
+  }
+ },
+ "renewable_share_pct": 10.553328394096477,
+ "kwh_per_m2": {
+  "count": 35.0,
+  "mean": 7.91,
+  "std": 3.65,
+  "min": 2.85,
+  "25%": 5.37,
+  "50%": 6.51,
+  "75%": 9.77,
+  "max": 19.14
+ },
+ "anomaly_flags": 490,
+ "cooling_kwh": 201246.523875
+}

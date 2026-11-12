@@ -1,0 +1,4 @@
+# Demonstration
+`gridwise-ai-demo.mp4` (≈3 min, 1440×900, **no audio stream**: verified with `ffprobe`) is a Playwright recording of the **local** application (API :8000, web :3000) running on **simulated** data, played at 1.2× speed. It follows the sequence: landing → admin login → dashboard (KPIs, zone switch, chart granularity) → map → academic building → building analytics → forecasting (24 h / 7 d) → anomaly review → cooling optimisation → renewable → optimisation run → recommendation approval → sustainability → reports → CSV export.
+Script: `frontend/e2e/record-demo.mjs`. Reproduce: start API + web, then `cd frontend && BASE_URL=http://localhost:3000 node e2e/record-demo.mjs` and `ffmpeg -i demo/raw/*.webm -an -c:v libx264 -pix_fmt yuv420p out.mp4`.
+It was recorded locally because the hosted frontend has no deployed backend yet. Screenshots: `demo/screenshots/`.

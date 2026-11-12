@@ -46,8 +46,19 @@ def overview(days: int = Query(30, ge=1, le=120), zone: str | None = None, build
     total = float(df.kwh.sum()); cost = float(df.cost.sum())
     last = df[df.ts == df.ts.max()]
     cur = float(last.kw.sum())
-    ren_q = select(func.coalesce(func.sum(RenewableReading.generation_kwh), 0), func.min(RenewableReading.data_source)).where(
-        RenewableReading.timestamp >= s.to_pydatetime(), RenewableReading.timestamp <= e.to_pydatetime())
+    ren_q = (select(func.coalesce(func.sum(RenewableReading.generation_kwh), 0), func.min(RenewableReading.data_source))
+             .join(RenewableAsset, RenewableAsset.id == RenewableReading.renewable_asset_id)
+             .join(Building, Building.id == RenewableAsset.building_id).join(Zone, Zone.id == Building.zone_id)
+             .where(RenewableReading.timestamp >= s.to_pydatetime(), RenewableReading.timestamp <= e.to_pydatetime()))
+    if zone:
+        ren_q = ren_q.where(Zone.zone_type == zone.capitalize())
+    if building_id:
+        ren_q = ren_q.where(Building.id == building_id)
+    sc0 = zone_scope(db, u)
+    if sc0 is not None:
+        ren_q = ren_q.where(Building.zone_id.in_(sc0))
+    if source:
+        ren_q = ren_q.where(RenewableReading.data_source == source)
     ren, rsrc = db.execute(ren_q).one()
     sav = _rec_savings(db)
     sc = zone_scope(db, u)
