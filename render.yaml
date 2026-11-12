@@ -1,0 +1,13 @@
+# Render Blueprint for the API (Docker). Create a Render Postgres and set DATABASE_URL, SECRET_KEY, FRONTEND_URL.
+services:
+  - type: web
+    name: gridwise-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - { key: DATABASE_URL, sync: false }
+      - { key: SECRET_KEY, generateValue: true }
+      - { key: FRONTEND_URL, sync: false }
+      - { key: DEMO_MODE, value: "true" }

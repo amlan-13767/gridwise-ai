@@ -4,6 +4,8 @@ from .config import settings
 
 _is_sqlite = settings.DATABASE_URL.startswith("sqlite")
 _url = settings.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+if _url.startswith("postgresql://"):
+    _url = _url.replace("postgresql://", "postgresql+psycopg://", 1)
 engine = create_engine(_url, connect_args={"check_same_thread": False} if _is_sqlite else {}, pool_pre_ping=True)
 if _is_sqlite:
     @event.listens_for(engine, "connect")

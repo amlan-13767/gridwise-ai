@@ -18,7 +18,7 @@ def main():
     ap.add_argument("--meters", nargs="+", default=["MTR-ACD-01", "MTR-HST-01"]); ap.add_argument("--count", type=int, default=3)
     ap.add_argument("--interval", type=float, default=1.0); ap.add_argument("--duplicate", action="store_true")
     a = ap.parse_args()
-    start = dt.datetime.now(dt.timezone.utc).replace(second=0, microsecond=0)
+    start = dt.datetime.now(dt.timezone.utc).replace(second=0, microsecond=0) - dt.timedelta(minutes=15 * a.count)  # publish recent past, never future
     if a.mode == "mqtt":
         import paho.mqtt.client as mqtt
         c = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -32,7 +32,7 @@ def main():
             for _ in range(2 if a.duplicate else 1):
                 key = device_key(settings.SECRET_KEY, m)
                 if a.mode == "mqtt":
-                    c.publish(f"gridwise/campus/simulated/{m.lower()}", json.dumps(dict(p, device_key=key)))
+                    c.publish(f"gridwise/campus/simulated/{m.lower()}", json.dumps(dict(p, device_key=key)), qos=1).wait_for_publish()
                 else:
                     r = urllib.request.Request(a.api + "/api/iot/ingest", json.dumps(p).encode(),
                                                {"Content-Type": "application/json", "X-Device-Key": key})

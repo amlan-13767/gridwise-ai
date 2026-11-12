@@ -1,0 +1,40 @@
+# Local stack: PostgreSQL + Redis + Mosquitto (authenticated) + API + Celery worker + MQTT ingestion worker.
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_USER: gridwise, POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-gridwise_dev_pw}", POSTGRES_DB: gridwise }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U gridwise"], interval: 5s, retries: 10 }
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+  mosquitto:
+    image: eclipse-mosquitto:2
+    environment: { MQTT_USERNAME: "${MQTT_USERNAME:-gridwise}", MQTT_PASSWORD: "${MQTT_PASSWORD:-mqtt_dev_pw}" }
+    volumes: ["./iot/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"]
+    command: sh -c "mosquitto_passwd -b -c /mosquitto/passwd $$MQTT_USERNAME $$MQTT_PASSWORD && chown mosquitto /mosquitto/passwd && exec mosquitto -c /mosquitto/config/mosquitto.conf"
+    ports: ["1883:1883"]
+  api:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    environment: &env
+      DATABASE_URL: postgresql://gridwise:${POSTGRES_PASSWORD:-gridwise_dev_pw}@db:5432/gridwise
+      SECRET_KEY: "${SECRET_KEY:-change-me-in-real-deployments}"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
+      REDIS_URL: redis://redis:6379/0
+      MQTT_BROKER_URL: mqtt://mosquitto:1883
+      MQTT_USERNAME: "${MQTT_USERNAME:-gridwise}"
+      MQTT_PASSWORD: "${MQTT_PASSWORD:-mqtt_dev_pw}"
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["8000:8000"]
+  worker:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    command: celery -A backend.app.tasks.celery_app.celery worker -B -l info
+    environment: *env
+    depends_on: [api, redis]
+  mqtt-ingest:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    command: python iot/mqtt/worker.py
+    environment: *env
+    depends_on: [api, mosquitto]
+volumes: { pgdata: {} }
