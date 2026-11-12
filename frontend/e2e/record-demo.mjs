@@ -4,6 +4,10 @@
 // Drives the REAL running application with real mouse movement and clicks. Data shown is SIMULATED.
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
+for (const line of (fs.existsSync(new URL("../.env.e2e", import.meta.url)) ? fs.readFileSync(new URL("../.env.e2e", import.meta.url), "utf8") : "").split(/\r?\n/)) {
+  const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^(['"])(.*)\1$/, "$2");
+}
+const PROD = !!process.env.E2E_EMAIL;  // production run: read-only (no approvals / status changes / new optimisation runs)
 
 const BASE = process.env.BASE_URL || "http://localhost:3000";
 const OUT = process.env.OUT_DIR || "../demo/raw";
@@ -83,7 +87,7 @@ await scroll(500, 1000); await wait(3000); await top();
 // 13-14 Anomalies
 await nav("Anomaly Detection"); await wait(2000);
 await click(page.getByTestId("anomaly-row").first(), 3500);
-await click(page.getByRole("button", { name: "Mark investigating" }), 2500);
+if (!PROD) await click(page.getByRole("button", { name: "Mark investigating" }), 2500); else await wait(2500);
 // 15-16 Cooling
 await nav("Cooling Intelligence"); await wait(2500);
 await scroll(350, 800);
@@ -94,12 +98,12 @@ await nav("Renewable Energy"); await wait(3000);
 await scroll(450, 1000); await wait(2500); await scroll(450, 1000); await wait(2500); await top();
 // 19-20 Optimization
 await nav("Optimization Engine"); await wait(2000);
-await click(page.getByTestId("run-opt"), 4000);
+if (!PROD) await click(page.getByTestId("run-opt"), 4000); else await wait(3000);
 await scroll(450, 1000); await wait(3500); await scroll(450, 1000); await wait(2500); await top();
 // 21 Recommendations
 await nav("AI Recommendations"); await wait(3000);
 await scroll(350, 800); await wait(1500);
-await click(page.getByTestId("approve-rec").first(), 3000);
+if (!PROD) await click(page.getByTestId("approve-rec").first(), 3000); else await wait(2500);
 await top();
 // 22 Sustainability
 await nav("Sustainability"); await wait(4000); await scroll(400, 900); await wait(2500); await top();
