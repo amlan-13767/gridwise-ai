@@ -93,5 +93,5 @@ def consumption(df, gran="day", group=None):
     cols = ["bucket"] + ([{"zone": "zone_type", "building": "building_name"}[group]] if group else [])
     g = d.groupby(cols).agg(kwh=("kwh", "sum"), cost=("cost", "sum")).reset_index()
     peaks = d.groupby(cols + ["ts"]).kw_max.sum().reset_index().groupby(cols).kw_max.max().rename("peak_kw").reset_index()
-    g = g.merge(peaks, on=cols)
+    g = g.merge(peaks, on=cols).rename(columns={"zone_type": "zone", "building_name": "building"})
     return g.round(2).to_dict("records")

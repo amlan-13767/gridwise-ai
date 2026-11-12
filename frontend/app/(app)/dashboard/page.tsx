@@ -63,7 +63,7 @@ export default function Dashboard() {
               <dd className="font-semibold">{z.zone === "Hostel" ? `${n1(z.kwh_per_occupied_bed_per_day)} kWh` : `${n1(z.kwh_per_m2)} kWh/m²`}</dd></div>
             <div className="col-span-2"><dt className="text-xs text-ink2">Potential savings (estimate)</dt><dd className="font-semibold text-good">{n0(z.potential_saving_kwh)} kWh</dd></div>
           </dl></Card></Link>))}</div>}</Q>
-      <div className="mt-6 grid gap-4 xl:grid-cols-3">
+      <div className="mt-6 grid items-start gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2" title="Building comparison" subtitle="Total kWh in period (top 12)">
           <Q q={bl}>{(d: any) => <Bars layout="vertical" data={d.items.slice(0, 12)} x="building" series={[{ key: "kwh", label: "Energy", color: "#2a78d6" }]} height={360} />}</Q>
         </Card>
