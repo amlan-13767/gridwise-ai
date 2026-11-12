@@ -100,7 +100,7 @@ test.describe("authenticated (administrator)", () => {
     await signIn(page);
     await page.goto("/map"); await page.locator(".leaflet-interactive").first().waitFor({ timeout: 60_000 });
     await page.locator(".leaflet-interactive").nth(2).click({ force: true });
-    await expect(page.getByRole("link", { name: "Open building analytics" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open building analytics" })).toBeVisible({ timeout: 60_000 });   // details load from the API
     await page.getByRole("link", { name: "Open building analytics" }).click();
     await expect(page.getByText("Predicted demand: next 24 hours")).toBeVisible({ timeout: 60_000 });
   });

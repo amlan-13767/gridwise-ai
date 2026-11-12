@@ -7,9 +7,9 @@ export const cx = clsx;
 
 export function Card({ title, subtitle, right, children, className }: { title?: React.ReactNode; subtitle?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cx("rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(15,23,42,.04)] fade-in", className)}>
+    <section className={cx("min-w-0 rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(15,23,42,.04)] fade-in", className)}>
       {(title || right) && (
-        <header className="mb-4 flex items-start justify-between gap-3">
+        <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div><h3 className="text-[15px] font-semibold text-ink">{title}</h3>{subtitle && <p className="mt-0.5 text-xs text-ink2">{subtitle}</p>}</div>
           {right}
         </header>
