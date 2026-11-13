@@ -24,6 +24,7 @@ async function signIn(page: Page) {
   await page.fill("#email", process.env.E2E_EMAIL!); await page.fill("#password", process.env.E2E_PASSWORD!);
   await page.click("button[type=submit]");
   await expect(page.getByTestId("kpi").first()).toBeVisible({ timeout: 90_000 });
+  expect(page.url()).not.toMatch(/password|email=/i);   // credentials must never appear in a URL
 }
 
 test.describe("unauthenticated", () => {

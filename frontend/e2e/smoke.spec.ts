@@ -86,3 +86,12 @@ test("administrator can add a building and change the emissions factor", async (
   await expect(page.getByText("Settings saved")).toBeVisible();
   await ef.fill("0.82"); await page.getByRole("button", { name: "Save changes" }).click();
 });
+
+
+test("login never puts credentials in the URL, even when submitted immediately", async ({ page }) => {
+  await page.goto("/login", { waitUntil: "commit" });
+  await page.fill("#email", "someone@example.org"); await page.fill("#password", "not-a-real-password");
+  await page.press("#password", "Enter");                       // submit as early as possible
+  await page.waitForTimeout(1500);
+  expect(page.url()).not.toMatch(/password|email=|someone/i);
+});

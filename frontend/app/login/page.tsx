@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,6 +21,9 @@ const ACCOUNTS = [
 
 export default function Login() {
   const router = useRouter(); const [busy, setBusy] = useState(false);
+  // false during SSR/hydration, true afterwards: the submit button stays disabled until the React handler is attached,
+  // otherwise an early click would fall back to a native form submission
+  const hydrated = useSyncExternalStore(() => () => {}, () => true, () => false);
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<F>({ resolver: zodResolver(schema) });
   const submit = async (v: F) => {
     setBusy(true);
@@ -36,7 +39,7 @@ export default function Login() {
         <p className="text-xs text-slate-400">Demonstration environment · simulated data only</p>
       </div>
       <div className="grid place-items-center p-6">
-        <form onSubmit={handleSubmit(submit)} className="w-full max-w-sm space-y-4" noValidate>
+        <form method="post" onSubmit={handleSubmit(submit)} className="w-full max-w-sm space-y-4" noValidate>
           <h1 className="text-2xl font-semibold">Sign in</h1>
           <p className="text-sm text-ink2">Accounts are created by an administrator. There is no public sign-up.</p>
           <div><label className="text-xs font-medium text-ink2" htmlFor="email">Email</label>
@@ -45,7 +48,7 @@ export default function Login() {
           <div><label className="text-xs font-medium text-ink2" htmlFor="password">Password</label>
             <input id="password" type="password" autoComplete="current-password" {...register("password")} className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-primary" />
             {errors.password && <p className="mt-1 text-xs text-bad">{errors.password.message}</p>}</div>
-          <Btn type="submit" disabled={busy} className="w-full justify-center py-2.5">{busy && <Spinner />}Sign in</Btn>
+          <Btn type="submit" disabled={busy || !hydrated} className="w-full justify-center py-2.5">{busy && <Spinner />}Sign in</Btn>
           {DEMO && DEMO_PW && (
             <div className="rounded-xl border border-dashed border-line p-3">
               <p className="mb-2 text-xs font-medium text-ink2">Demo accounts (simulated environment)</p>

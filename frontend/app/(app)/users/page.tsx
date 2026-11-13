@@ -26,7 +26,7 @@ export default function Users() {
           <Td><Badge kind={u.is_active ? "online" : "offline"}>{u.is_active ? "active" : "disabled"}</Badge></Td>
           <Td><Btn variant="ghost" onClick={() => patch.mutate({ id: u.id, body: { is_active: !u.is_active } })}>{u.is_active ? "Disable" : "Enable"}</Btn></Td></tr>))}</Table>}</Q></Card>
       <Card className="mt-6" title="Create user">
-        <form onSubmit={handleSubmit((v) => create.mutate(v))} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" noValidate>
+        <form method="post" onSubmit={handleSubmit((v) => create.mutate(v))} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" noValidate>
           {([["name", "Full name", "text"], ["email", "Email", "email"], ["password", "Initial password", "password"]] as const).map(([k, l, t]) => (
             <label key={k} className="text-xs text-ink2">{l}<input type={t} {...register(k)} autoComplete="off" className="mt-1 block w-full rounded-lg border border-line px-2 py-1.5 text-sm text-ink" />{errors[k] && <span className="text-bad">{errors[k]?.message as string}</span>}</label>))}
           <label className="text-xs text-ink2">Role<select {...register("role")} className="mt-1 block w-full rounded-lg border border-line px-2 py-1.5 text-sm text-ink"><option value="super_admin">Super Administrator</option><option value="energy_manager">Facilities / Energy Manager</option><option value="zone_manager">Zone Manager</option><option value="viewer">Viewer / Auditor</option></select></label>

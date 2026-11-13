@@ -26,7 +26,7 @@ export default function CampusConfig() {
   return (
     <Card className="mt-6" title="Campus infrastructure" subtitle="Buildings and zones are configurable data, not hard-coded. The sample records are SIMULATED, not the real NIT Rourkela inventory.">
       <div className="grid gap-6 xl:grid-cols-2">
-        <form onSubmit={bf.handleSubmit((v: any) => addB.mutate(v))} className="grid gap-3 sm:grid-cols-2" noValidate>
+        <form method="post" onSubmit={bf.handleSubmit((v: any) => addB.mutate(v))} className="grid gap-3 sm:grid-cols-2" noValidate>
           <p className="text-sm font-medium sm:col-span-2">Add building</p>
           <label className="text-xs text-ink2">Zone<select {...bf.register("zone_id")} className={inp}><option value="">Select…</option>{(zones.data || []).map((z: any) => <option key={z.id} value={z.id}>{z.name}</option>)}</select></label>
           <label className="text-xs text-ink2">Code<input {...bf.register("code")} placeholder="ACD-11" className={inp} /></label>
@@ -37,7 +37,7 @@ export default function CampusConfig() {
           <div className="flex items-end"><Btn type="submit" disabled={addB.isPending}>Add building</Btn></div>
           {Object.values(bf.formState.errors).length > 0 && <p className="text-xs text-bad sm:col-span-2">Check the highlighted fields: zone, code, name and type are required.</p>}
         </form>
-        <form onSubmit={zf.handleSubmit((v: any) => addZ.mutate(v))} className="grid content-start gap-3 sm:grid-cols-2" noValidate>
+        <form method="post" onSubmit={zf.handleSubmit((v: any) => addZ.mutate(v))} className="grid content-start gap-3 sm:grid-cols-2" noValidate>
           <p className="text-sm font-medium sm:col-span-2">Create zone</p>
           <label className="text-xs text-ink2">Name<input {...zf.register("name")} className={inp} /></label>
           <label className="text-xs text-ink2">Type<select {...zf.register("zone_type")} className={inp}>{["Academic", "Hostel", "Residential"].map((t) => <option key={t}>{t}</option>)}</select></label>
