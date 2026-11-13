@@ -14,6 +14,18 @@ async def lifespan(app):
     anyio.to_thread.current_default_thread_limiter().total_tokens = int(__import__("os").getenv("API_THREADS", "6"))
     if settings.ENVIRONMENT != "production":  # production schema is managed by Alembic (see bootstrap)
         Base.metadata.create_all(engine)
+    if settings.ENVIRONMENT == "production":
+        import threading
+
+        def warm():  # build the cached analytics frame in the background so the first dashboard load is fast
+            try:
+                from .core.db import SessionLocal
+                from .services import analytics
+                with SessionLocal() as db:
+                    analytics.frame(db)
+            except Exception:  # noqa: BLE001
+                pass
+        threading.Thread(target=warm, daemon=True, name="warmup").start()
     yield
 
 
@@ -35,7 +47,7 @@ def health():
     from .core.db import SessionLocal
     from .models.tables import User, Zone
     out = dict(status="ok", mode="monitoring_and_recommendation_only", data="SIMULATED DEMONSTRATION DATA" if settings.DEMO_MODE else "see source labels",
-               version="1.1.2", environment=settings.ENVIRONMENT)
+               version="1.1.3", environment=settings.ENVIRONMENT)
     try:
         with SessionLocal() as db:
             out.update(database="ok", simulated_data_loaded=bool(db.scalar(select(func.count()).select_from(Zone))),
