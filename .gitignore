@@ -15,3 +15,6 @@ demo/raw/
 frontend/test-results/
 playwright-report/
 .vercel/
+demo/raw_prod/
+demo/raw/
+*.webm
