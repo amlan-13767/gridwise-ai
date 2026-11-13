@@ -47,7 +47,7 @@ def health():
     from .core.db import SessionLocal
     from .models.tables import User, Zone
     out = dict(status="ok", mode="monitoring_and_recommendation_only", data="SIMULATED DEMONSTRATION DATA" if settings.DEMO_MODE else "see source labels",
-               version="1.1.3", environment=settings.ENVIRONMENT)
+               version="1.1.4", environment=settings.ENVIRONMENT)
     try:
         with SessionLocal() as db:
             out.update(database="ok", simulated_data_loaded=bool(db.scalar(select(func.count()).select_from(Zone))),

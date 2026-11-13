@@ -9,7 +9,7 @@ const API = process.env.E2E_API_URL || "https://gridwise-api-9ypw.onrender.com";
 const HAVE = !!(process.env.E2E_EMAIL && process.env.E2E_PASSWORD);
 test.use({ baseURL: SITE });
 test.setTimeout(120_000);
-test.describe.configure({ retries: 1 });   // production network start-up hiccups: any retry is visible in the report
+test.describe.configure({ retries: 0 });   // no retries: any flakiness must be visible
 
 /** Navigate without waiting for the full `load` event (one hanging subresource would block it) and log failing requests. */
 async function go(page: Page, path: string) {

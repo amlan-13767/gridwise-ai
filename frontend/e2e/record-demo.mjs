@@ -14,9 +14,20 @@ const OUT = process.env.OUT_DIR || "../demo/raw";
 fs.rmSync(OUT, { recursive: true, force: true }); fs.mkdirSync(OUT, { recursive: true });
 
 const browser = await chromium.launch();
+if (PROD) {
+  // NOT recorded: warm the server-side caches by visiting the same pages/filters the demo uses, so the recording shows normal speed
+  const wctx = await browser.newContext({ viewport: { width: 1440, height: 900 } }); const w = await wctx.newPage();
+  await w.goto(BASE + "/login"); await w.fill("#email", process.env.E2E_EMAIL); await w.fill("#password", process.env.E2E_PASSWORD); await w.click("button[type=submit]");
+  await w.getByTestId("kpi").first().waitFor({ timeout: 120000 });
+  for (const z of ["Academic", "Hostel", "Residential", "all"]) { await w.getByLabel("Zone", { exact: true }).first().selectOption(z); await w.waitForTimeout(2500); }
+  for (const p of ["/map", "/academic", "/forecast", "/anomalies", "/cooling", "/renewable", "/optimization", "/recommendations", "/sustainability", "/reports"]) { await w.goto(BASE + p); await w.waitForLoadState("networkidle"); }
+  await wctx.close();
+}
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: OUT, size: { width: 1440, height: 900 } }, acceptDownloads: true });
 const page = await ctx.newPage();
 
+// production run: the real admin email is typed into the form, so blur that field in the recording (password input is already masked)
+if (PROD) await ctx.addInitScript(() => { const st = document.createElement("style"); st.textContent = "#email{filter:blur(6px)!important}"; (document.head || document.documentElement).appendChild(st); new MutationObserver(() => { if (!st.isConnected) (document.head || document.documentElement).appendChild(st); }).observe(document.documentElement, { childList: true }); });
 // visible, unobtrusive cursor (follows the real mouse events)
 await ctx.addInitScript(() => {
   const add = () => {

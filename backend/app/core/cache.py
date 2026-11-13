@@ -1,6 +1,6 @@
 """Short-lived per-user response cache for read-only analytics endpoints.
 Why: on Render's free tier (a fraction of a CPU) pandas aggregations take seconds. The data only changes on writes, so
-identical GETs are served from memory. Safety: keyed by the caller's bearer token (no cross-user leakage); invalid/expired
+identical GETs are served from memory. Safety: keyed by the verified user id + role from the token (no cross-user leakage); invalid/expired
 tokens bypass the cache and reach the normal 401 path; any successful POST/PATCH/DELETE clears everything; bounded size + TTL."""
 import time
 from collections import OrderedDict
@@ -12,6 +12,8 @@ TTL_SECONDS = 180
 MAX_ENTRIES = 80
 MAX_BODY_BYTES = 400_000
 CACHEABLE = ("/api/energy/", "/api/cooling/", "/api/reports/", "/api/renewable/", "/api/forecast", "/api/anomalies", "/api/recommendations", "/api/optimization/runs")
+# POSTs that do not change cached analytics data (login, logout, the read-only cooling optimiser, device ingestion: bounded by TTL)
+NON_MUTATING = ("/api/auth/", "/api/cooling/optimize", "/api/iot/ingest")
 SKIP_HEADERS = {"content-length", "transfer-encoding", "connection"}
 
 _store: "OrderedDict[tuple, tuple]" = OrderedDict()
@@ -26,13 +28,14 @@ class ResponseCache(BaseHTTPMiddleware):
         path = request.url.path
         if request.method in ("POST", "PATCH", "PUT", "DELETE"):
             resp = await call_next(request)
-            if resp.status_code < 400:
+            if resp.status_code < 400 and not path.startswith(NON_MUTATING):
                 clear()  # data may have changed
             return resp
         auth = request.headers.get("authorization", "")
-        if request.method != "GET" or not path.startswith(CACHEABLE) or not auth.lower().startswith("bearer ") or not decode_token(auth.split(" ", 1)[1]):
+        claims = decode_token(auth.split(" ", 1)[1]) if auth.lower().startswith("bearer ") else None
+        if request.method != "GET" or not path.startswith(CACHEABLE) or not claims:
             return await call_next(request)
-        key = (path, request.url.query, auth)
+        key = (path, request.url.query, claims.get("sub"), claims.get("role"))  # per verified user, shared across that user's sessions
         hit = _store.get(key)
         if hit and time.time() - hit[0] < TTL_SECONDS:
             _store.move_to_end(key)

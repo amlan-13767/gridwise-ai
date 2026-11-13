@@ -268,3 +268,13 @@ def test_cached_csv_keeps_headers(client, admin):
         r = client.get("/api/reports/energy?format=csv&days=7", headers=admin)
         assert r.headers["content-type"].startswith("text/csv") and "attachment" in r.headers["content-disposition"]
     assert r.headers.get("x-cache") == "HIT"
+
+
+def test_cache_is_shared_across_sessions_of_the_same_user_only(client):
+    from tests.conftest import login
+    p = "/api/energy/zones?days=14"
+    a = login(client, "admin@gridwise.demo"); client.get(p, headers=a)
+    a2 = login(client, "admin@gridwise.demo")                                       # a brand-new session/token for the same user
+    assert client.get(p, headers=a2).headers.get("x-cache") == "HIT"
+    other = login(client, "viewer@gridwise.demo")
+    assert client.get(p, headers=other).headers.get("x-cache") == "MISS"             # a different user never reuses it
