@@ -248,3 +248,23 @@ def test_renewable_attributed_to_filtered_scope(client, admin):
     acad = client.get("/api/energy/overview?days=30&zone=Academic", headers=admin).json()
     assert res["renewable_kwh"] == 0 and res["renewable_pct"] == 0          # solar assets are academic only
     assert abs(acad["renewable_kwh"] - camp["renewable_kwh"]) < 1e-6
+
+
+def test_response_cache_is_per_user_validated_and_invalidated_on_writes(client, admin, manager, viewer):
+    p = "/api/energy/zones?days=30"
+    a1 = client.get(p, headers=admin); a2 = client.get(p, headers=admin)
+    assert a1.status_code == 200 and a2.headers.get("x-cache") == "HIT" and a1.json() == a2.json()
+    assert client.get(p).status_code == 401                                       # no token: never served from cache
+    assert client.get(p, headers={"Authorization": "Bearer junk.token.here"}).status_code == 401
+    v = client.get("/api/energy/consumption?group=building&zone=Residential", headers=viewer).json()["items"]
+    assert v == []                                                                # viewer privacy rule still applies
+    assert client.get("/api/energy/consumption?group=building&zone=Residential", headers=admin).json()["items"] != []  # not shared across users
+    client.patch("/api/settings", json={"electricity_tariff": 6.0}, headers=admin)  # a write clears the cache
+    assert client.get(p, headers=admin).headers.get("x-cache") == "MISS"
+
+
+def test_cached_csv_keeps_headers(client, admin):
+    for _ in range(2):
+        r = client.get("/api/reports/energy?format=csv&days=7", headers=admin)
+        assert r.headers["content-type"].startswith("text/csv") and "attachment" in r.headers["content-disposition"]
+    assert r.headers.get("x-cache") == "HIT"

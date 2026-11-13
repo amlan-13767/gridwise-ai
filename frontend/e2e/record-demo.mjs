@@ -76,7 +76,7 @@ await scroll(520, 1200); await wait(2000); await scroll(520, 1200); await wait(2
 await nav("Energy Map"); await wait(2500);
 await click(page.getByRole("tab", { name: "Academic" }), 2000);
 const markers = page.locator(".leaflet-interactive"); await markers.first().waitFor();
-await click(markers.nth(2), 3500);
+await click(markers.first(), 3500);
 await scroll(300, 800); await wait(1500);
 await click(page.getByRole("link", { name: "Open building analytics" }), 3500);
 await scroll(600, 1200); await wait(2500); await scroll(600, 1200); await wait(2500); await top();

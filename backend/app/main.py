@@ -19,6 +19,8 @@ async def lifespan(app):
 
 app = FastAPI(title="GRIDWISE AI API", version="1.0.0", lifespan=lifespan,
               description="Smart campus energy intelligence. Demo data is SIMULATED. Monitoring and recommendation only - no equipment control.")
+from .core.cache import ResponseCache
+app.add_middleware(ResponseCache)  # added before CORS so CORS headers wrap cached responses too
 origins = [settings.FRONTEND_URL, "http://localhost:3000", "http://127.0.0.1:3000"] + [o for o in settings.EXTRA_CORS_ORIGINS.split(",") if o]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_origin_regex=r"https://gridwise-ai[a-z0-9-]*\.vercel\.app",
                    allow_credentials=False, allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Authorization", "Content-Type", "X-Device-Key"])
@@ -33,7 +35,7 @@ def health():
     from .core.db import SessionLocal
     from .models.tables import User, Zone
     out = dict(status="ok", mode="monitoring_and_recommendation_only", data="SIMULATED DEMONSTRATION DATA" if settings.DEMO_MODE else "see source labels",
-               version="1.1.1", environment=settings.ENVIRONMENT)
+               version="1.1.2", environment=settings.ENVIRONMENT)
     try:
         with SessionLocal() as db:
             out.update(database="ok", simulated_data_loaded=bool(db.scalar(select(func.count()).select_from(Zone))),
