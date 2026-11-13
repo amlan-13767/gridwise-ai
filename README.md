@@ -6,7 +6,7 @@
 * Repository: https://github.com/amlan-13767/gridwise-ai (public)
 * Live frontend: https://gridwise-ai-xi.vercel.app (Vercel) · API: https://gridwise-api-9ypw.onrender.com (Render free tier, PostgreSQL). The free API sleeps when idle: the first request after inactivity can take ~1 minute.
 * **First login**: there are no built-in production accounts. The owner creates the first Super Administrator by setting `GRIDWISE_ADMIN_EMAIL` and `GRIDWISE_ADMIN_PASSWORD` in the Render environment (see `docs/deployment.md`).
-* Silent demo video: [`demo/gridwise-ai-demo.mp4`](demo/gridwise-ai-demo.mp4) (local app, simulated data, no audio)
+* Silent demo video: [`demo/gridwise-ai-demo.mp4`](demo/gridwise-ai-demo.mp4) (3 min, recorded on the deployed production app, simulated data, no audio)
 
 ## Problem and solution
 Campuses face unoccupied-space consumption, evening hostel peaks, inefficient cooling, no unified view, undetected anomalies, solar/demand mismatch and rising peak cost. GRIDWISE AI unifies metering data and provides demand forecasting, anomaly detection, cooling analysis/optimisation, solar forecasting, load-shifting optimisation, explainable recommendations, carbon estimates, reports and IoT ingestion.

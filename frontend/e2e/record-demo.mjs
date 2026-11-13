@@ -26,8 +26,6 @@ if (PROD) {
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: OUT, size: { width: 1440, height: 900 } }, acceptDownloads: true });
 const page = await ctx.newPage();
 
-// production run: the real admin email is typed into the form, so blur that field in the recording (password input is already masked)
-if (PROD) await ctx.addInitScript(() => { const st = document.createElement("style"); st.textContent = "#email{filter:blur(6px)!important}"; (document.head || document.documentElement).appendChild(st); new MutationObserver(() => { if (!st.isConnected) (document.head || document.documentElement).appendChild(st); }).observe(document.documentElement, { childList: true }); });
 // visible, unobtrusive cursor (follows the real mouse events)
 await ctx.addInitScript(() => {
   const add = () => {
@@ -65,14 +63,17 @@ await scroll(500); await wait(1500); await top();
 await click(page.getByTestId("cta-login"), 1500);
 // 3 Login as administrator (password field is masked; demo account, simulated environment)
 if (process.env.E2E_EMAIL && process.env.E2E_PASSWORD) {
+  // the real admin email is typed below: render the email field as dots (like the password field) so it is never readable in the video
+  await page.locator("#email").waitFor(); await page.addStyleTag({ content: "#email{-webkit-text-security:disc !important;text-security:disc !important}" });
   // production run: credentials come from the environment, typed into the (masked) password field; never written anywhere
   await click(page.locator("#email"), 300); await page.keyboard.type(process.env.E2E_EMAIL, { delay: 70 });
   await click(page.locator("#password"), 300); await page.keyboard.type(process.env.E2E_PASSWORD, { delay: 70 }); await wait(600);
 } else {
   await click(page.getByTestId("demo-administrator"), 1200); // local demo accounts only
 }
-await click(page.getByRole("button", { name: "Sign in" }), process.env.E2E_EMAIL ? 25000 : 3500); // production free tier may need to wake up
-await page.getByTestId("kpi").first().waitFor({ timeout: 90000 });
+await click(page.getByRole("button", { name: "Sign in" }), 500);
+await page.getByTestId("kpi").first().waitFor({ timeout: 90000 }); // waits only as long as the (possibly sleeping) free-tier API needs
+await wait(3000);
 // 4-5 Dashboard KPIs
 await hover(page.getByTestId("kpi").first()); await wait(1800);
 await hover(page.getByTestId("kpi").nth(3)); await wait(1500);
